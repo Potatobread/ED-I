@@ -1,0 +1,205 @@
+package arvoreAVL;
+
+public class Arvore {
+	public No raiz;
+	String texto = "";
+	
+	public Arvore() { 
+		raiz = null;
+	}
+	
+	private int altura(No y){
+		if(y == null) {
+			return 0;
+		} else {
+			return y.altura;
+		}
+	}
+	
+	int maior(int a, int b){
+		if(a > b)
+			return a;
+		else
+			return b;
+	}
+
+	public No rotacionarParaEsquerda(No y) {
+		No aux = y.direita;  //Filho da direita
+		
+		//Rotacionar
+		y.direita = aux.esquerda;
+		aux.esquerda = y;
+		
+		//Altura
+		y.altura = maior(altura(y.esquerda),altura(y.direita))+1;
+		aux.altura = maior(altura(aux.esquerda),altura(aux.direita))+1;
+		
+		return aux;
+	}
+	public No rotacionarParaDireita(No y) {
+		No aux = y.esquerda;  //Filho da esquerda  
+		
+		//Rotacionar
+		y.esquerda = aux.direita;
+		aux.direita = y;
+		
+		//Altura
+		y.altura = maior(altura(y.esquerda),altura(y.direita))+1;
+		aux.altura = maior(altura(aux.esquerda),altura(aux.direita))+1;
+		
+		return aux;
+	}
+	
+	int fatorDeBalanceamento(No y){
+		if(y == null) {
+			return 0;
+		}
+		return altura(y.direita) - altura(y.esquerda); 
+	}
+	
+	public No identificaPai(int x, No y){
+		No pai = null;
+		
+		if(y != null) {
+			while(y.valor != x){ 
+				pai = y;
+				if(y.valor > x)
+					y = y.esquerda;
+	    		else
+	    			y = y.direita;
+			}	
+	    	return pai;
+		}
+		return null;
+	}
+	
+	public No balanceamento(No y) {
+		int	fb = fatorDeBalanceamento(y);
+   	
+		if(fb > 1 && fatorDeBalanceamento(y.direita) >= 0) // ROT. ESQUERDA
+			return rotacionarParaEsquerda(y);
+	   	else if(fb > 1 && fatorDeBalanceamento(y.direita) < 0){ // DUPLA ESQUERDA
+	   		y.direita = rotacionarParaDireita(y.direita);	
+	   		return rotacionarParaEsquerda(y);
+		}
+		else if(fb < -1 && fatorDeBalanceamento(y.esquerda) <= 0) // ROT. DIREITA
+			return rotacionarParaDireita(y);
+		else if(fb < -1 && fatorDeBalanceamento(y.esquerda) > 0){ // DUPLA DIREITA
+			y.esquerda = rotacionarParaEsquerda(y.esquerda);
+			return rotacionarParaDireita(y);
+		}
+		
+		return y;
+	}
+	
+	public No inserir(int x, No y) {
+		if(y == null) {
+			return (new No(x));
+		}
+		if(x < y.valor) {		
+			y.esquerda = inserir(x,y.esquerda);
+		} else if(x > y.valor){
+			y.direita = inserir(x,y.direita);
+		} else { //Caso seja igual , nada acontece
+			
+		}
+
+		y.altura = maior(altura(y.esquerda),altura(y.direita)) + 1;
+		
+		return y = balanceamento(y);
+	}
+
+	public No encontraMaior(No y){
+	    if(y.direita == null)
+	    	return y;
+	    else
+	    	return encontraMaior(y.direita);
+	}
+	
+    public void imprimir() {
+    	if(raiz!= null) {
+    	int fb = fatorDeBalanceamento(raiz);
+        texto += Integer.toString(raiz.valor) + "(raiz FB: " + Integer.toString(fb) + ")\n";
+        imprimeNos(raiz, " ");
+    	}
+    }
+    public void imprimeNos(No y,String espaçamento) {
+    	int fb;
+        if(y.direita != null) {
+        	fb = fatorDeBalanceamento(y.direita); 
+            texto += ("  "+ espaçamento + Integer.toString(y.direita.valor) + "   (pai: " + Integer.toString(y.valor) + " - FB : " + Integer.toString(fb) + ")\n");
+            imprimeNos(y.direita, espaçamento + "\t");
+        }
+        if(y.esquerda != null) {
+        	fb = fatorDeBalanceamento(y.esquerda);
+            texto += ("  " + espaçamento + Integer.toString(y.esquerda.valor) + "   (pai: " + Integer.toString(y.valor) + " - FB: " + Integer.toString(fb) + ")\n");
+            imprimeNos(y.esquerda, espaçamento + "\t");
+        }
+    }
+	
+    public void localizaNo(int x, No y) {
+    	No aux = y;
+    	while(y != null){
+    		if (x > y.valor)
+    			y = y.direita;
+    		else if (x < y.valor)
+    			y = y.esquerda;
+            else {
+            	No pai = identificaPai(x,aux);
+        		int fb = fatorDeBalanceamento(y);
+        		texto += ("No: " + Integer.toString(y.valor) + "(FB: " + Integer.toString(fb) + ")\n");
+        		if(pai != null) {
+        			fb = fatorDeBalanceamento(pai);
+        			texto += ("\tPai: " + pai.valor + " (FB: " + fb + ")\n");
+        		}
+        	    if(y.direita != null) {
+        	    	fb = fatorDeBalanceamento(y.direita); 
+        	    	texto +=("\tFilho a Direita:  " + y.direita.valor + "   (FB: " + fb + ")\n");
+        	    }
+                if(y.esquerda != null) {
+                	fb = fatorDeBalanceamento(y.esquerda);
+                	texto += ("\tFilho a Esquerda: " + y.esquerda.valor + "   (FB: " + fb + ")\n");
+                }
+                return;
+            }     
+        }
+    	texto += ("Elemento não presente na AVL.");
+    }
+    
+    public No excluiElemento(int x, No y){
+    	if(y == null)
+    		return y;
+    	else {
+    		if(x < y.valor)
+    			y.esquerda = excluiElemento(x,y.esquerda);
+    		else if(x > y.valor)
+    			y.direita = excluiElemento(x,y.direita);
+    		else{
+    			if(y.esquerda == null && y.direita == null){ // NO SEM FILHO
+    				return null;
+    			} else if (y.esquerda == null || y.direita == null) { // NO COM 1 FILHO
+    				No aux = null;
+    		    	if(y.esquerda == null){
+    					aux = y.direita;
+    					y.direita = aux.esquerda;
+    					y = aux;
+    				}
+    		    	else if(y.direita == null){
+    					aux = y.esquerda;
+    					y.esquerda = aux.direita;
+    					y = aux;
+    				}
+    			} else { // NO COM 2 FILHOS
+    				No aux = encontraMaior(y.esquerda);
+    				y.valor = aux.valor;
+    				aux.valor = x;
+    				y.esquerda = excluiElemento(x,y.esquerda);    	
+    			}
+    		}
+    	}
+        	
+      	y.altura = maior(altura(y.esquerda),altura(y.direita)) + 1;
+        	
+       	return y = balanceamento(y);		
+  	}	
+}
