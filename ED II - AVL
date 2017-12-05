@@ -161,13 +161,11 @@ Avl* excluiElemento(int x, Avl* y){
 					aux = y->dir;
 					y->dir = aux->esq;
 					y = aux;
-					free(aux);
 				}
-				if(y->dir == NULL){
+				else if(y->dir == NULL){
 					aux = y->esq;
 					y->esq = aux->dir;
 					y = aux;
-					free(aux);
 				}
 			}
 			else{
@@ -200,11 +198,9 @@ void imprimePre(Avl* a){
 }
 
 void carregar_Arquivos(tArquivo *p){
-	FILE *leitura;
+	FILE *leitura = fopen("INPUT.txt", "r");
 	int i=0;
-	
-	leitura = fopen("INPUT.txt", "r");
-	
+		
 	if(leitura == NULL){
 		printf("Erro ao abrir o arquivo.\n");
 		exit(0);
@@ -247,7 +243,7 @@ int main(){
 				break;
 			case 3:
 				printf("\n");
-				imprimePre(arvore);
+				imprime(arvore);
 				printf("\n");
 				break;
 			case 4:
@@ -259,8 +255,8 @@ int main(){
 				printf("Excluir No: ");
 				scanf("%d", &num);
 				arvore = excluiElemento(num,arvore);
-				printf("\n");
-				identada(arvore);
+				printf("\n");				
+				imprimePre(arvore);
 				printf("\n");
 				break;
 			default:
